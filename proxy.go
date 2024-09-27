@@ -38,7 +38,7 @@ func (proxy AIProxy) Ping() error {
 		Timeout: proxy.Timeout,
 	}
 
-	req, err := http.NewRequest("POST", proxy.Url+"/api/v1/ping", bytes.NewBuffer(reqJson))
+	req, err := http.NewRequest("POST", proxy.Url+API_PING, bytes.NewBuffer(reqJson))
 	if err != nil {
 		return fmt.Errorf("creating request: %v", err)
 	}
