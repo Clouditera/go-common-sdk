@@ -373,6 +373,12 @@ func GetItemsEx[T any](db *gorm.DB, conds QueryConds, options ...QueryOption) (i
 	return GetItems[T](db, conds, false, options...)
 }
 
+// GetAllItems get all items.
+func GetAllItems[T any](db *gorm.DB) (items []T, err error) {
+	items, _, err = GetItemsEx[T](db, QueryConds{})
+	return items, err
+}
+
 // GetItemsColumnEx is a simple wrapper of GetItemsColumn but set require to false.
 func GetItemsColumnEx[T any, V any](db *gorm.DB, conds QueryConds, options ...QueryOption) (items []V, found bool, err error) {
 	return GetItemsColumn[T, V](db, conds, false, options...)
