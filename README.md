@@ -1,11 +1,11 @@
-# aiproxy-sdk
+# clouditera-sdk
 
-aiproxy-sdk是clouditera调用aiproxy服务的go库。
+clouditera-sdk是clouditera内部封装的go SDK仓库。
 
 ## 使用方法
 
 ```bash
-export GOPRIVATE=gitlab.clouditera.com
-export GOINSECURE=gitlab.clouditera.com
-go get gitlab.clouditera.com/clouditera/aiproxy-sdk
+export GOPRIVATE=source.gitlab.clouditera.com
+export GOINSECURE=source.gitlab.clouditera.com
+go get source.gitlab.clouditera.com/clouditera/go-common-sdk
 ```
