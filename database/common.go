@@ -90,6 +90,42 @@ func (qo QueryOption) GetOrder() string {
 	}
 }
 
+// Sql returns the sql string of the query option.
+func (qo QueryOption) Sql() (sql string, err error) {
+	if qo.Order != "" {
+		sql += fmt.Sprintf("ORDER BY %s", qo.GetOrder())
+	}
+
+	if qo.Limit > 0 {
+		if sql != "" {
+			sql += " "
+		}
+		sql += fmt.Sprintf("LIMIT %d", qo.Limit)
+	}
+
+	if qo.Offset > 0 {
+		if sql != "" {
+			sql += " "
+		}
+		sql += fmt.Sprintf("OFFSET %d", qo.Offset)
+	}
+
+	if qo.PageSize > 0 {
+		if qo.PageId > 0 {
+			if sql != "" {
+				sql += " "
+			}
+			sql += fmt.Sprintf("LIMIT %d OFFSET %d", qo.PageSize, (qo.PageId-1)*qo.PageSize)
+		} else {
+			return sql, logutil.LogError("WrapDB: invalid query option: %s", qo)
+		}
+	} else if qo.PageId < 0 {
+		return sql, logutil.LogError("WrapDB: invalid query option: %s", qo)
+	}
+
+	return sql, nil
+}
+
 func (qo QueryOption) WrapDB(tx *gorm.DB) (*gorm.DB, error) {
 	if qo.Offset > 0 {
 		tx = tx.Offset(qo.Offset)
@@ -541,7 +577,12 @@ func GetItemByRawQuery[T any](db *gorm.DB, query string, args ...interface{}) (i
 
 // GetItemsByRawQuery get items by raw sql query
 func GetItemsByRawQuery[T any](db *gorm.DB, option QueryOption, query string, args ...interface{}) (items []T, found bool, err error) {
-	tx := WrapDB(db).Raw(query, args...)
+	qoSql, err := option.Sql()
+	if err != nil {
+		return items, false, err
+	}
+
+	tx := WrapDB(db).Raw(query+" "+qoSql, args...)
 	if tx, err = option.WrapDB(tx); err != nil {
 		return items, false, err
 	}

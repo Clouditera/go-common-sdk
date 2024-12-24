@@ -145,3 +145,40 @@ func TestDatabaseOperation_Integration(t *testing.T) {
 	require.True(t, found)
 	require.Equal(t, user.Name, "test4")
 }
+
+func TestQueryOption_Sql(t *testing.T) {
+	qo := QueryOption{
+		Limit:  10,
+		Offset: 0,
+		Order:  "-id",
+	}
+	sql, err := qo.Sql()
+	require.NoError(t, err)
+	require.Equal(t, sql, "ORDER BY id DESC LIMIT 10")
+
+	qo = QueryOption{
+		Limit:  10,
+		Offset: 5,
+		Order:  "-id",
+	}
+	sql, err = qo.Sql()
+	require.NoError(t, err)
+	require.Equal(t, sql, "ORDER BY id DESC LIMIT 10 OFFSET 5")
+
+	qo = QueryOption{
+		Order:    "-id",
+		PageId:   2,
+		PageSize: 10,
+	}
+	sql, err = qo.Sql()
+	require.NoError(t, err)
+	require.Equal(t, sql, "ORDER BY id DESC LIMIT 10 OFFSET 10")
+
+	qo = QueryOption{
+		Order:    "-id",
+		PageId:   0,
+		PageSize: 10,
+	}
+	_, err = qo.Sql()
+	require.Error(t, err)
+}
