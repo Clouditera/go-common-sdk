@@ -444,10 +444,20 @@ func GetItemsCountByConds[T any](db *gorm.DB, conds QueryConds) (count int64, er
 	return count, nil
 }
 
-// GetItemsCountByRawQuery get items count by raw sql query
-func GetItemsCountByRawQuery[T any](db *gorm.DB, query string, args ...interface{}) (count int64, err error) {
+// GetItemsCountByQuery get items count by query condition
+func GetItemsCountByQuery[T any](db *gorm.DB, query interface{}, args ...interface{}) (count int64, err error) {
 	var table T
 	tx := WrapDB(db).Model(&table).Where(query, args...)
+	if err = tx.Count(&count).Error; err != nil {
+		return 0, logutil.LogError("GetItemsCountByRawQuery: query=%s, args=%v, err=%v", query, args, err)
+	}
+
+	return count, nil
+}
+
+// GetItemsCountByRawQuery get items count by raw sql query
+func GetItemsCountByRawQuery[T any](db *gorm.DB, query string, args ...interface{}) (count int64, err error) {
+	tx := WrapDB(db).Raw(query, args...)
 	if err = tx.Count(&count).Error; err != nil {
 		return 0, logutil.LogError("GetItemsCountByRawQuery: query=%s, args=%v, err=%v", query, args, err)
 	}
