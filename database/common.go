@@ -23,22 +23,34 @@ func SetDebug(d bool) {
 }
 
 type QueryKeyValue struct {
-	ColName  string
-	ColValue interface{}
+	Query string
+	Args  []interface{}
 }
 
 func (kv QueryKeyValue) String() string {
-	return fmt.Sprintf("%s=%v", kv.ColName, kv.ColValue)
+	query := kv.Query
+	if len(kv.Args) == 0 {
+		return query
+	}
+
+	for _, arg := range kv.Args {
+		if strings.Contains(query, "?") {
+			query = strings.Replace(query, "?", fmt.Sprintf("%v", arg), 1)
+		} else {
+			return query + "=" + fmt.Sprintf("%v", arg)
+		}
+	}
+	return query
 }
 
 type QueryConds []QueryKeyValue
 
-func NewQueryConds(colName string, colValue interface{}) QueryConds {
-	return QueryConds{{ColName: colName, ColValue: colValue}}
+func NewQueryConds(cond string, args ...interface{}) QueryConds {
+	return QueryConds{{Query: cond, Args: args}}
 }
 
-func (qc QueryConds) Add(colName string, colValue interface{}) QueryConds {
-	return append(qc, QueryKeyValue{ColName: colName, ColValue: colValue})
+func (qc QueryConds) Add(cond string, args ...interface{}) QueryConds {
+	return append(qc, QueryKeyValue{Query: cond, Args: args})
 }
 
 func (qc QueryConds) String() string {
@@ -259,7 +271,7 @@ func UpdateItem[T any](db *gorm.DB, conds QueryConds, values FieldValues) (affec
 	var item T
 	tx := WrapDB(db).Model(&item).Where("TRUE")
 	for i := 0; i < len(conds); i++ {
-		tx = tx.Where(conds[i].ColName, conds[i].ColValue)
+		tx = tx.Where(conds[i].Query, conds[i].Args...)
 	}
 
 	result := tx.Updates(values.AsMap())
@@ -289,7 +301,7 @@ func UpdatesOrInsert[T any](db *gorm.DB, item T) (affected int64, err error) {
 func GetItem[T any](db *gorm.DB, conds QueryConds, require bool, options ...QueryOption) (item T, found bool, err error) {
 	tx := WrapDB(db)
 	for _, cond := range conds {
-		tx = tx.Where(cond.ColName, cond.ColValue)
+		tx = tx.Where(cond.Query, cond.Args...)
 	}
 
 	for _, option := range options {
@@ -317,7 +329,7 @@ func GetItem[T any](db *gorm.DB, conds QueryConds, require bool, options ...Quer
 func GetItems[T any](db *gorm.DB, conds QueryConds, require bool, options ...QueryOption) (items []T, found bool, err error) {
 	tx := WrapDB(db)
 	for _, cond := range conds {
-		tx = tx.Where(cond.ColName, cond.ColValue)
+		tx = tx.Where(cond.Query, cond.Args...)
 	}
 
 	for _, option := range options {
@@ -346,7 +358,7 @@ func GetItemColumn[T any, V any](db *gorm.DB, conds QueryConds, require bool, op
 	var table T
 	tx := WrapDB(db).Model(&table)
 	for _, cond := range conds {
-		tx = tx.Where(cond.ColName, cond.ColValue)
+		tx = tx.Where(cond.Query, cond.Args...)
 	}
 
 	for _, option := range options {
@@ -375,7 +387,7 @@ func GetItemsColumn[T any, V any](db *gorm.DB, conds QueryConds, require bool, o
 	var table T
 	tx := WrapDB(db).Model(&table)
 	for _, cond := range conds {
-		tx = tx.Where(cond.ColName, cond.ColValue)
+		tx = tx.Where(cond.Query, cond.Args...)
 	}
 
 	for _, option := range options {
@@ -470,7 +482,7 @@ func GetItemsCountByConds[T any](db *gorm.DB, conds QueryConds) (count int64, er
 	var table T
 	tx := WrapDB(db).Model(&table)
 	for i := 0; i < len(conds); i++ {
-		tx = tx.Where(conds[i].ColName, conds[i].ColValue)
+		tx = tx.Where(conds[i].Query, conds[i].Args...)
 	}
 
 	if err = tx.Count(&count).Error; err != nil {
@@ -618,7 +630,7 @@ func DeleteItemByConds[T any](db *gorm.DB, conds QueryConds) (affected int64, er
 	var item T
 	tx := WrapDB(db)
 	for i := 0; i < len(conds); i++ {
-		tx = tx.Where(conds[i].ColName, conds[i].ColValue)
+		tx = tx.Where(conds[i].Query, conds[i].Args...)
 	}
 
 	if err := tx.Delete(&item).Error; err != nil {

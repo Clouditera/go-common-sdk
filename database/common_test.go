@@ -14,6 +14,9 @@ import (
 func TestQueryKeyValueString(t *testing.T) {
 	conds := NewQueryConds("id", "123").Add("name", "test")
 	require.Equal(t, "[id=123 AND name=test]", fmt.Sprintf("%v", conds))
+
+	conds = NewQueryConds("id = ? OR name = ?", "123", "test")
+	require.Equal(t, "[id = 123 OR name = test]", fmt.Sprintf("%v", conds))
 }
 
 type MysqlContainer struct {
