@@ -185,3 +185,9 @@ func TestQueryOption_Sql(t *testing.T) {
 	_, err = qo.Sql()
 	require.Error(t, err)
 }
+
+func TestQueryConds_Sql(t *testing.T) {
+	qc := NewQueryConds("id", "1").Add("name", "test")
+	sql := qc.Sql()
+	require.Equal(t, sql, "id=1 AND name=test")
+}

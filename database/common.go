@@ -62,6 +62,22 @@ func (qc QueryConds) String() string {
 	return fmt.Sprintf("[%s]", strings.Join(strs, " AND "))
 }
 
+func (qc QueryConds) Sql() string {
+	if len(qc) == 0 {
+		return "TRUE"
+	}
+
+	sql := ""
+	for i, cond := range qc {
+		if i == 0 {
+			sql += fmt.Sprintf("%s", cond.String())
+		} else {
+			sql += fmt.Sprintf(" AND %s", cond.String())
+		}
+	}
+	return sql
+}
+
 type FieldValues map[string]interface{}
 
 func (fv FieldValues) String() string {

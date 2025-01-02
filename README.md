@@ -12,4 +12,5 @@ go get source.gitlab.clouditera.com/clouditera/go-common-sdk@v0.0.5
 
 ## 更新日志
 
+- v0.0.6 (2025年1月2日): 增加QueryConds的Sql方法
 - v0.0.5 (2024年12月25日): 增加QueryConds对多参数的支持
