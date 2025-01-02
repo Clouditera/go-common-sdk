@@ -103,11 +103,16 @@ func NewFieldValues(colName string, colValue interface{}) FieldValues {
 }
 
 type QueryOption struct {
-	Offset   int    // 偏移量
-	Limit    int    // 限制
-	Order    string // 排序
-	PageId   int    // 页码
-	PageSize int    // 每页大小
+	// Set table name, used if table name is not matched with returned struct name.
+	Table string // 表名
+
+	// Set select columns, used if only some columns are needed.
+	Select   []string // 选择列
+	Offset   int      // 偏移量
+	Limit    int      // 限制
+	Order    string   // 排序
+	PageId   int      // 页码
+	PageSize int      // 每页大小
 }
 
 func (qo QueryOption) GetOrder() string {
@@ -155,6 +160,14 @@ func (qo QueryOption) Sql() (sql string, err error) {
 }
 
 func (qo QueryOption) WrapDB(tx *gorm.DB) (*gorm.DB, error) {
+	if qo.Table != "" {
+		tx = tx.Table(qo.Table)
+	}
+
+	if len(qo.Select) > 0 {
+		tx = tx.Select(qo.Select)
+	}
+
 	if qo.Offset > 0 {
 		tx = tx.Offset(qo.Offset)
 	}

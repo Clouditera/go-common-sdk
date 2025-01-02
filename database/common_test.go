@@ -71,6 +71,16 @@ func (r *MysqlContainer) Terminate(ctx context.Context) {
 	r.container.Terminate(ctx)
 }
 
+type User struct {
+	Id       int    `db:"id"`
+	Name     string `db:"name"`
+	Password string `db:"password"`
+}
+
+func (User) TableName() string {
+	return "user"
+}
+
 func TestDatabaseOperation_Integration(t *testing.T) {
 	logrus.SetLevel(logrus.InfoLevel)
 	if testing.Short() {
@@ -84,12 +94,6 @@ func TestDatabaseOperation_Integration(t *testing.T) {
 
 	db, err := OpenDatabase(container.URI)
 	require.NoError(t, err)
-
-	type User struct {
-		Id       int    `db:"id"`
-		Name     string `db:"name"`
-		Password string `db:"password"`
-	}
 
 	err = db.AutoMigrate(&User{})
 	require.NoError(t, err)
@@ -147,6 +151,15 @@ func TestDatabaseOperation_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, found)
 	require.Equal(t, user.Name, "test4")
+
+	option := QueryOption{
+		Select: []string{"name"},
+		Table:  "user",
+	}
+	users, _, err := GetItemsEx[string](db, NewQueryConds("id", "2"), option)
+	require.NoError(t, err)
+	require.Equal(t, len(users), 1)
+	require.Equal(t, users[0], "test4")
 }
 
 func TestQueryOption_Sql(t *testing.T) {
