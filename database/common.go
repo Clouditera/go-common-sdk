@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Clouditera/go-common-sdk/logutil"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"source.gitlab.clouditera.com/clouditera/go-common-sdk/logutil"
 )
 
 // debug is a global variable to control whether to print debug logs.

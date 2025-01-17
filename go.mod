@@ -1,4 +1,4 @@
-module source.gitlab.clouditera.com/clouditera/go-common-sdk
+module github.com/Clouditera/go-common-sdk
 
 go 1.21
 
