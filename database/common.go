@@ -676,7 +676,7 @@ func DeleteItemByConds[T any](db *gorm.DB, conds QueryConds) (affected int64, er
 // DeleteItemByRawQuery delete item by raw sql query condition
 func DeleteItemByRawQuery[T any](db *gorm.DB, query string, args ...interface{}) (affected int64, err error) {
 	var item T
-	result := WrapDB(db).Delete(&item).Where(query, args...)
+	result := WrapDB(db).Where(query, args...).Delete(&item)
 	if result.Error != nil {
 		return 0, logutil.LogError("DeleteItemByRawQuery: query=%s, args=%v, err=%v", query, args, result.Error)
 	}
